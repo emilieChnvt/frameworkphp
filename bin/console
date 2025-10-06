@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+if($argv[1] === "help")
+{
+    echo "TATATA SUPERMAN";
+}
+
+if($argv[1] === "serve")
+{
+    print_r("Your super professionnal server just started at http://localhost:8081");
+    print_r("\n");
+    shell_exec("php -S localhost:8081 -t public -d display_errors=1 -d display_startup_errors=1 -d error_reporting=E_ALL
+");
+}
