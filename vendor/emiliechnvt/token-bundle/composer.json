@@ -1,0 +1,13 @@
+{
+  "name": "emiliechnvt/token-bundle",
+  "description": "Mini bundle JWT simple pour Symfony",
+  "type": "symfony-bundle",
+  "autoload": {
+    "psr-4": {
+      "EmilieChnvt\\TokenBundle\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=8.0"
+  }
+}

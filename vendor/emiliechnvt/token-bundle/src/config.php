@@ -1,0 +1,4 @@
+<?php
+
+
+const SECRET = 'cejbqckjbaekbcelsn';
