@@ -99,5 +99,8 @@ class User implements UserInterface
     }
 
 
-
+    public function getAuthenticator()
+    {
+        // TODO: Implement getAuthenticator() method.
+    }
 }
