@@ -25,7 +25,7 @@ class SecurityController extends Controller
     #[Route(uri:'/profile', routeName: 'profile')]
     public function profile()
     {
-        $payload = $this->auth->checkToken(); // Vérifie le token
+        $payload = $this->auth->checkToken(); // Vérif le token
         echo json_encode([
             'message' => 'Accès autorisé',
             'user' => $payload
