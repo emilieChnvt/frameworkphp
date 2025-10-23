@@ -25,6 +25,7 @@ class Auth
             exit;
         }
 
+
         // Récupération du token dans les headers
         $token = null;
         if (isset($_SERVER['Authorization'])) {
