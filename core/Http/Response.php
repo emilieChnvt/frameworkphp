@@ -69,4 +69,13 @@ public function render(string $templateName, array $data)
 
 }
 
+
+public function json(array $data)
+{
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($data);
+    return $this;
+
+}
+
 }

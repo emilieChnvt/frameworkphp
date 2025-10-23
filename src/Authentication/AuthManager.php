@@ -21,9 +21,14 @@ class AuthManager
     }
 
     // Vérifier le token
-    public function checkToken(): array
+    // AuthManager.php
+    public function checkToken(string $token): ?array
     {
-        $auth = new Auth($this->secret);
-        return $auth->handle();
+        $auth = new TokenAuth($this->secret);
+        if ($auth->verify($token)) {
+            return $auth->getPayload($token);
+        }
+        return null;
     }
+
 }

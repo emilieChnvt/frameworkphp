@@ -25,9 +25,8 @@ class TokenAuth
 
         $base64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(json_encode($header)));
         $base64Payload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode(json_encode($payload)));
-        $encodedSecret = base64_encode($this->secret);
 
-        $signature = hash_hmac('sha256', $base64Header . '.' . $base64Payload, $encodedSecret, true);
+        $signature = hash_hmac('sha256', $base64Header . '.' . $base64Payload, $this->secret, true);
         $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
 
         return $base64Header . '.' . $base64Payload . '.' . $base64Signature;
@@ -35,12 +34,24 @@ class TokenAuth
 
     public function check(string $token): bool
     {
-        $headers = $this->getHeader($token);
-        $payload = $this->getPayload($token);
-        $verifToken = $this->generate($payload, 0);
+        $parts = explode('.', $token);
+        if (count($parts) !== 3) return false;
 
-        return $token === $verifToken;
+        [$base64Header, $base64Payload, $base64Signature] = $parts;
+
+        // recalcul de la signature
+        $expectedSignature = hash_hmac(
+            'sha256',
+            $base64Header . '.' . $base64Payload,
+            $this->secret,
+            true
+        );
+        $expectedBase64 = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($expectedSignature));
+
+        // comparaison sécurisée
+        return hash_equals($expectedBase64, $base64Signature);
     }
+
 
     public function getHeader(string $token): array
     {

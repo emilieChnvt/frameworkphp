@@ -2,33 +2,92 @@
 
 namespace App\Controller;
 
+use App\Repository\UserRepository;
+use Attributes\DefaultEntity;
 use Core\Attributes\Route;
 use App\Authentication\AuthManager;
+use App\Entity\User;
 use Core\Controller\Controller;
+use Core\Http\Response;
+use EmilieChnvt\TokenBundle\JWT;
 
+#[DefaultEntity(entityName: User::class)]
 class SecurityController extends Controller
 {
     private AuthManager $auth;
 
     public function __construct()
     {
-        $this->auth = new AuthManager('MON_SECRET_SUPER_SECRETE');
+        parent::__construct();
+        $this->auth = new AuthManager('SECRETE');
     }
 
-    #[Route(uri:'/login', routeName: 'login')]
-    public function login()
+    #[Route(uri: '/login', routeName: 'login')]
+    public function login(): Response
     {
-        $token = $this->auth->generateToken(['user_id' => 123], 3600);
-        echo json_encode(['token' => $token]);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
+
+            $user = $this->getRepository()->findOneBy(['email' => $email]);
+            if ($user && $user->passwordMatches($password)) {
+                $payload = [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ];
+
+                // Passer le payload directement
+                $token = $this->auth->generateToken($payload, 3600);
+
+                return $this->json([
+                    'message' => 'Authentification réussie',
+                    'token' => $token,
+                    'user' => $payload
+                ]);
+            }
+
+            return $this->json([
+                'status' => 'error',
+                'message' => 'Email ou mot de passe incorrect',
+            ], 401);
+        }
+
+        return $this->render('auth/index', []);
     }
 
-    #[Route(uri:'/profile', routeName: 'profile')]
-    public function profile()
+
+    #[Route(uri: '/profile', routeName: 'profile')]
+    public function profile(): Response
     {
-        $payload = $this->auth->checkToken(); // Vérif le token
-        echo json_encode([
-            'message' => 'Accès autorisé',
-            'user' => $payload
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'] ?? '';
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            return $this->json(['error' => 'Token manquant'], 401);
+        }
+
+        $token = $matches[1];
+        $payload = $this->auth->checkToken($token);
+
+        // Vérifie que l'id existe directement
+        if (!$payload || !isset($payload['id'])) {
+            return $this->json(['error' => 'Token invalide ou expiré'], 401);
+        }
+
+        $user = $this->getRepository()->find((int)$payload['id']);
+        if (!$user) {
+            return $this->json(['error' => 'Utilisateur introuvable'], 404);
+        }
+
+        return $this->json([
+            'message' => 'Token valide',
+            'user' => [
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles()
+            ]
         ]);
     }
+
+
+
 }

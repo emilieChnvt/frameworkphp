@@ -33,6 +33,11 @@ class Controller
         return $this->response->render($templateName, $data);
     }
 
+    public function json(array $data)
+    {
+        return $this->response->json($data);
+    }
+
     public function getRepository(string $targetEntity = null)
     {
         if(!$targetEntity)

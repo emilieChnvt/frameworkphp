@@ -2,57 +2,49 @@
 
 namespace App\Entity;
 
+use App\Repository\PostRepository;
 use App\Repository\UserRepository;
+use Attributes\TargetRepository;
+use Core\Attributes\Table;
 use Core\Security\UserInterface;
+use Core\Security\UserManagement;
 
 
-
-class User implements UserInterface
+#[Table(name: 'user')]
+#[TargetRepository(repoName:UserRepository::class)]
+class User extends UserManagement
 {
 
-    private ?int $id = null;
-
-
-    private ?string $email = null;
-
-
+    protected int $id;
+    private string $email;
+    protected string $password;
     private array $roles = [];
 
-    private ?string $password = null;
-
-
-
-
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
-
-    public function getEmail(): ?string
+    public function getEmail(): string
     {
         return $this->email;
     }
-
-    public function setEmail(string $email): static
+    public function setEmail(string $email): void
     {
         $this->email = $email;
-
-        return $this;
     }
-
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
-    public function getUserIdentifier(): string
+    public function getPassword(): string
     {
-        return (string) $this->email;
+        return $this->password;
+    }
+    public function setPassword( $clearPassword): void
+    {
+        $this->password = password_hash($clearPassword, PASSWORD_BCRYPT);
     }
 
-    /**
-     * @see UserInterface
-     */
+    public function getAuthenticator(): string
+    {
+        return $this->email;
+    }
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -72,35 +64,4 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): static
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
-    public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
-        return $data;
-    }
-
-
-    public function getAuthenticator()
-    {
-        // TODO: Implement getAuthenticator() method.
-    }
 }

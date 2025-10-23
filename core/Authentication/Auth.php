@@ -12,10 +12,7 @@ class Auth
         header('Content-Type: application/json');
     }
 
-    /**
-     * Vérifie le token JWT présent dans les headers Authorization
-     * @return array Le payload du token
-     */
+
     public function handle(): array
     {
         // On interdit toute méthode autre que POST
