@@ -44,7 +44,6 @@ class RegistrationController extends Controller
         $user->setPassword($password);
         $user->setRoles(['ROLE_USER']); // rôle par défaut
 
-
         $this->getRepository()->save($user);
 
         return $this->json([

@@ -32,14 +32,5 @@ class CommentRepository extends Repository
 
 
 
-    public function save(Comment $comment) : Comment
-    {
 
-        $this->pdo->prepare("INSERT INTO $this->tableName (content, post_id) VALUES (:content, :post_id)")->execute([
-            "content"=>$comment->getContent(),
-            "post_id"=>$comment->getPostId()
-        ]);
-
-        return $this->find($this->pdo->lastInsertId());
-    }
 }

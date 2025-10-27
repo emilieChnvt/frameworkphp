@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use App\Form\PostType;
+use App\Repository\PostRepository;
 use Attributes\DefaultEntity;
 use Core\Attributes\Route;
 use Core\Controller\Controller;
@@ -18,10 +19,8 @@ class PostController extends Controller
     #[Route(uri:'/posts', routeName: 'posts')]
     public function index():Response
     {
-
-        return $this->render('post/index', [
-            "posts"=> $this->getRepository()->findAll()
-        ]);
+        $posts = $this->getRepository()->findAll();
+        return $this->json($posts);
     }
 
     #[Route(uri: "/post/show", routeName: "post")]
@@ -52,7 +51,7 @@ class PostController extends Controller
             $post->setTitle($postForm->getValue("title"));
             $post->setContent($postForm->getValue("content"));
             $id = $this->getRepository()->save($post);
-            return $this->redirectToRoute("post", ["id"=>$id]);
+            return $this->json([$post]);
 
 
         }

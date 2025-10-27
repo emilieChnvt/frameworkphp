@@ -60,6 +60,8 @@ class SecurityController extends Controller
     #[Route(uri: '/profile', routeName: 'profile')]
     public function profile(): Response
     {
+        // Récup  token depuis l'en-tête Authorization
+
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'] ?? '';
         if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
             return $this->json(['error' => 'Token manquant'], 401);
@@ -68,7 +70,7 @@ class SecurityController extends Controller
         $token = $matches[1];
         $payload = $this->auth->checkToken($token);
 
-        // Vérifie que l'id existe directement
+        // Vérif que l'id existe
         if (!$payload || !isset($payload['id'])) {
             return $this->json(['error' => 'Token invalide ou expiré'], 401);
         }
@@ -86,6 +88,13 @@ class SecurityController extends Controller
                 'roles' => $user->getRoles()
             ]
         ]);
+    }
+
+    #[Route(uri: '/test', routeName: 'test')]
+    public function index(): Response
+    {
+        $users = $this->getRepository()->findAll();
+        return $this->json($users);
     }
 
 
