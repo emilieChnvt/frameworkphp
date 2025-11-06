@@ -24,7 +24,6 @@ class User extends UserManagement implements  JsonSerializable
     protected string $password;
 
     #[Column(name:'Roles', length: 255)]
-
     protected array $roles = ['ROLE_USER'];
 
     public function jsonSerialize(): array

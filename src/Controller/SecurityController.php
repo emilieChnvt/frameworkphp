@@ -61,10 +61,9 @@ class SecurityController extends Controller
     public function profile(): Response
     {
         // Récup  token depuis l'en-tête Authorization
-
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['Authorization'] ?? '';
         if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-            return $this->json(['error' => 'Token manquant'], 401);
+            return $this->json(['error' => 'Token manquant'], 401); // Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
         }
 
         $token = $matches[1];

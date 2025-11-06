@@ -99,7 +99,8 @@ abstract class Repository
     }
     public function find(int $id) : object | bool
     {
-        $query = $this->pdo->prepare("SELECT * FROM $this->tableName WHERE id = :id");
+        $string = $this->getColumnList();
+        $query = $this->pdo->prepare("SELECT $string FROM $this->tableName WHERE id = :id");
         $query->execute([
             "id"=> $id
         ]);
@@ -127,16 +128,16 @@ abstract class Repository
                 $columnsArray[]=$column;
             }
         }
-        // Créer INSERT INTO $this->tableName (content, post_id)
+        // getColumnList sans id
         $columns = implode(',', $columnsArray);
 
-        // Créer VALUES (:content, :post_id)
+        // :content, :post_id
         $placeholders = ':' . implode(',:', $columnsArray);
 
 
         $query = $this->pdo->prepare("INSERT INTO $this->tableName ($columns) VALUES ($placeholders)");
 
-        // 3️⃣ Récupérer dynamiquement les valeurs  : >execute([
+        //
         //            "content"=>$comment->getContent(),
         //            "post_id"=>$comment->getPostId()
         //        ]);
@@ -161,7 +162,7 @@ abstract class Repository
 
         $query->execute($values);
 
-        // 5️⃣ Récupérer l'id auto-incrémenté et l’assigner à l’objet
+        // Récup l'id AIé et l’assigner à l’objet
         $lastId = (int)$this->pdo->lastInsertId();
         if (property_exists($entity, 'id')) { // si y'a bien une propriét id =>
             $idProperty = $reflection->getProperty('id');
@@ -207,7 +208,7 @@ abstract class Repository
             $values[$columnName] = $value;
         }
 
-        // Ajouter l'id pour le WHERE
+        // id pour le WHERE
         $idProp = $reflection->getProperty('id');
         $idProp->setAccessible(true);
         $values['id'] = $idProp->getValue($entity);
@@ -220,19 +221,20 @@ abstract class Repository
 
 
 
+
     public function findBy(array $criteria): array
     {
         $string = $this->getColumnList();
         $sql = "SELECT $string FROM {$this->tableName}";
-        $params = [];
+        $params = []; //["test"=>test]
 
         if ($criteria) {
             $conditions = [];
             foreach ($criteria as $column => $value) {
-                $conditions[] = "$column = :$column";
-                $params[$column] = $value;
+                $conditions[] = "$column = :$column"; //'id' => 5
+                $params[$column] = $value; //  $params['id'] = 5;
             }
-            $sql .= " WHERE " . implode(" AND ", $conditions);
+            $sql = $sql .  " WHERE " . implode(" AND ", $conditions); //WHERE id = :id AND status = :status"
         }
 
         $stmt = $this->pdo->prepare($sql);
@@ -240,6 +242,21 @@ abstract class Repository
 
         return $stmt->fetchAll(\PDO::FETCH_CLASS, $this->targetEntity);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     public function findOneBy(array $criteria): object|null
     {
         $results = $this->findBy($criteria);
